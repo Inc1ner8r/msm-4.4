@@ -194,10 +194,8 @@ static void od_check_cpu(int cpu, unsigned int load)
 static unsigned int od_dbs_timer(struct cpu_dbs_info *cdbs,
 				 struct dbs_data *dbs_data, bool modify_all)
 {
-	struct cpufreq_policy *policy = cdbs->shared->policy;
-	unsigned int cpu = policy->cpu;
-	struct od_cpu_dbs_info_s *dbs_info = &per_cpu(od_cpu_dbs_info,
-			cpu);
+	struct dbs_data *dbs_data = policy->governor_data;
+	struct od_cpu_dbs_info_s *dbs_info = &per_cpu(od_cpu_dbs_info, policy->cpu);
 	struct od_dbs_tuners *od_tuners = dbs_data->tuners;
 	int delay = 0, sample_type = dbs_info->sample_type;
 
@@ -211,7 +209,7 @@ static unsigned int od_dbs_timer(struct cpu_dbs_info *cdbs,
 		__cpufreq_driver_target(policy, dbs_info->freq_lo,
 					CPUFREQ_RELATION_H);
 	} else {
-		dbs_check_cpu(policy, cpu);
+		dbs_check_cpu(policy);
 		if (dbs_info->freq_lo) {
 			/* Setup timer for SUB_SAMPLE */
 			dbs_info->sample_type = OD_SUB_SAMPLE;
