@@ -119,7 +119,7 @@ static unsigned int cs_dbs_timer(struct cpufreq_policy *policy)
 {
 	struct cs_dbs_tuners *cs_tuners = dbs_data->tuners;
 
-	dbs_check_cpu(dbs_data, policy->cpu);
+	dbs_check_cpu(policy, policy->cpu);
 	return delay_for_sampling_rate(cs_tuners->sampling_rate);
 }
 

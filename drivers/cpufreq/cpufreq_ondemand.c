@@ -211,7 +211,7 @@ static unsigned int od_dbs_timer(struct cpu_dbs_info *cdbs,
 		__cpufreq_driver_target(policy, dbs_info->freq_lo,
 					CPUFREQ_RELATION_H);
 	} else {
-		dbs_check_cpu(dbs_data, cpu);
+		dbs_check_cpu(policy, cpu);
 		if (dbs_info->freq_lo) {
 			/* Setup timer for SUB_SAMPLE */
 			dbs_info->sample_type = OD_SUB_SAMPLE;
