@@ -450,6 +450,7 @@ static unsigned long msm_cpp_queue_buffer_info(struct cpp_device *cpp_dev,
 	buff->map_info.buff_info = *buffer_info;
 	buff->map_info.buf_fd = buffer_info->fd;
 
+<<<<<<< HEAD
 #if defined(CONFIG_TRACING) && defined(DEBUG)
 	trace_printk("fd %d index %d native_buff %d ssid %d %d\n",
 		buffer_info->fd, buffer_info->index,
@@ -457,6 +458,8 @@ static unsigned long msm_cpp_queue_buffer_info(struct cpp_device *cpp_dev,
 		buff_queue->stream_id);
 #endif
 
+=======
+>>>>>>> a667852ec592 (remove faulty trace_printk)
 	if (buff_queue->security_mode == SECURE_MODE)
 		rc = cam_smmu_get_stage2_phy_addr(cpp_dev->iommu_hdl,
 			buffer_info->fd, CAM_SMMU_MAP_RW,
@@ -486,13 +489,6 @@ static void msm_cpp_dequeue_buffer_info(struct cpp_device *cpp_dev,
 	struct msm_cpp_buffer_map_list_t *buff)
 {
 	int ret = -1;
-
-#if defined(CONFIG_TRACING) && defined(DEBUG)
-	trace_printk("fd %d index %d native_buf %d ssid %d %d\n",
-		buff->map_info.buf_fd, buff->map_info.buff_info.index,
-		buff->map_info.buff_info.native_buff, buff_queue->session_id,
-		buff_queue->stream_id);
-#endif
 
 	if (buff_queue->security_mode == SECURE_MODE)
 		ret = cam_smmu_put_stage2_phy_addr(cpp_dev->iommu_hdl,
