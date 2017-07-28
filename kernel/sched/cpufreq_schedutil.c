@@ -97,7 +97,6 @@ static bool sugov_should_update_freq(struct sugov_policy *sg_policy, u64 time)
 		 */
 		sg_policy->next_freq = UINT_MAX;
 		return true;
-	}
 
 	delta_ns = time - sg_policy->last_freq_update_time;
 
@@ -875,6 +874,11 @@ struct cpufreq_governor cpufreq_gov_schedutil = {
 
 static int __init sugov_register(void)
 {
+        int cpu;
+
+        for_each_possible_cpu(cpu)
+                per_cpu(sugov_cpu, cpu).cpu = cpu;
+
 	return cpufreq_register_governor(&cpufreq_gov_schedutil);
 }
 fs_initcall(sugov_register);
