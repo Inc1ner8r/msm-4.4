@@ -68,7 +68,14 @@
 #include <asm/div64.h>
 #include "internal.h"
 
+<<<<<<< HEAD
 atomic_long_t kswapd_waiters = ATOMIC_LONG_INIT(0);
+=======
+#ifndef CONFIG_DEBUG_KERNEL
+inline void dump_page(struct page *page, const char *reason) {}
+EXPORT_SYMBOL(dump_page);
+#endif
+>>>>>>> 3622786f94b5 (treewide: Remove tracing and debug drivers)
 
 /* prevent >1 _updater_ of zone percpu pageset ->high and ->batch fields */
 static DEFINE_MUTEX(pcp_batch_high_lock);
@@ -483,7 +490,9 @@ static void bad_page(struct page *page, const char *reason,
 
 	printk(KERN_ALERT "BUG: Bad page state in process %s  pfn:%05lx\n",
 		current->comm, page_to_pfn(page));
+#ifdef CONFIG_DEBUG_KERNEL
 	dump_page_badflags(page, reason, bad_flags);
+#endif
 	dump_page_owner(page);
 
 	print_modules();
