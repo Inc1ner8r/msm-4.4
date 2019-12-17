@@ -1790,46 +1790,6 @@
 				};
 			};
 
-/* Huaqin modify for ZQL1650-143 by wangxiang at 2018/01/23 start */
-			commonfp_reset_reset: commonfp_reset_reset {
-				mux {
-					pins = "gpio20";
-					function = "gpio";
-				};
-				config {
-					pins = "gpio20";
-					drive-strength = <2>;
-					bias-disable = <0>;
-					output-low;
-				};
-			};
-
-			commonfp_reset_active: commonfp_reset_active {
-				mux {
-					pins = "gpio20";
-					function = "gpio";
-				};
-				config {
-					pins = "gpio20";
-					drive-strength = <2>;
-					bias-disable = <0>;
-					output-high;
-				};
-			};
-
-			commonfp_irq_active: commonfp_irq_active {
-				mux {
-					pins = "gpio72";
-					function = "gpio";
-				};
-				config {
-					pins = "gpio72";
-					drive-strength = <2>;
-					bias-disable = <0>;
-					input-enable;
-				};
-			};
-/* Huaqin modify for ZQL1650-143 by wangxiang at 2018/01/23 end */
 /*Huaqin modify for ZQL1650-141 by chenyijun5 at 2018/02/01 start*/
 		psensor_irq {
 			psensor_int_active: psensor_int_active {
