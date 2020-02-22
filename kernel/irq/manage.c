@@ -1353,7 +1353,15 @@ __setup_irq(unsigned int irq, struct irq_desc *desc, struct irqaction *new)
 		}
 
 		/* Set default affinity mask once everything is setup */
-		setup_affinity(desc, mask);
+		if (new->flags & IRQF_PERF_CRITICAL) {
+			add_desc_to_perf_list(desc);
+			irqd_set(&desc->irq_data, IRQD_AFFINITY_MANAGED);
+			raw_spin_lock(&perf_irqs_lock);
+			affine_one_perf_irq(desc);
+			raw_spin_unlock(&perf_irqs_lock);
+		} else {
+			setup_affinity(desc, mask);
+		}
 
 	} else if (new->flags & IRQF_TRIGGER_MASK) {
 		unsigned int nmsk = new->flags & IRQF_TRIGGER_MASK;
