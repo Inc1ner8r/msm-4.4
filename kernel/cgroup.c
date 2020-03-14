@@ -60,6 +60,8 @@
 #include <linux/cpuset.h>
 #include <linux/atomic.h>
 #include <linux/cpu_boost.h>
+#include <linux/devfreq_boost.h>
+#include <linux/sched/sysctl.h>
 
 /*
  * pidlists linger the following amount before being destroyed.  The goal
@@ -2759,7 +2761,9 @@ static ssize_t __cgroup_procs_write(struct kernfs_open_file *of, char *buf,
 
 	/* Boost CPU to the max for 500 ms when any app becomes a top app */
 	if (!ret && !memcmp(cgrp->kn->name, "top-app", sizeof("top-app"))) {
+                sysctl_sched_energy_aware = 0;
 		input_boost_max_kick(500);
+		devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 500);
 	}
 
 	put_task_struct(tsk);
