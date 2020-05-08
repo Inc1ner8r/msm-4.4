@@ -617,6 +617,7 @@ static struct platform_driver cdfinger_driver = {
 	.driver = {
 		.name = "cdfinger_fp",
 		.of_match_table = cdfinger_of_match,
+		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
 	},
 	.id_table = cdfinger_id,
 	.probe = cdfinger_probe,
