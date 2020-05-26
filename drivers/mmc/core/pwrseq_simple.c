@@ -34,13 +34,12 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
 	if (!IS_ERR(reset_gpios)) {
 		int i, *values;
 		int nvalues = reset_gpios->ndescs;
-
 		values = kmalloc_array(nvalues, sizeof(int), GFP_KERNEL);
 		if (!values)
 			return;
 
 		for (i = 0; i < nvalues; i++)
-			values[i] = value;
+		values[i] = value;
 
 		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc, values);
 		kfree(values);

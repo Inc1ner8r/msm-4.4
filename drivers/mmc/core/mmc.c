@@ -27,6 +27,7 @@
 #include "bus.h"
 #include "mmc_ops.h"
 #include "sd_ops.h"
+#include "pwrseq.h"
 
 /* Huaqin add for ZQL1650-43 by lanshiming at 2018/1/18 start*/
 static int IS_BOOT_TIME = 1;
@@ -1445,17 +1446,13 @@ static int mmc_select_hs400(struct mmc_card *card)
 	mmc_set_bus_speed(card);
 
 	if (card->ext_csd.strobe_support && host->ops->enhanced_strobe) {
-		mmc_host_clk_hold(host);
 		err = host->ops->enhanced_strobe(host);
 		if (!err)
 			host->ios.enhanced_strobe = true;
-		mmc_host_clk_release(host);
 	} else if ((host->caps2 & MMC_CAP2_HS400_POST_TUNING) &&
 			host->ops->execute_tuning) {
-		mmc_host_clk_hold(host);
 		err = host->ops->execute_tuning(host,
 				MMC_SEND_TUNING_BLOCK_HS200);
-		mmc_host_clk_release(host);
 
 		if (err)
 			pr_warn("%s: tuning execution failed\n",
@@ -1561,7 +1558,7 @@ out_err:
 
 static void mmc_select_driver_type(struct mmc_card *card)
 {
-	int card_drv_type, drive_strength, drv_type;
+	int card_drv_type, drive_strength, drv_type = 0;
 
 	card_drv_type = card->ext_csd.raw_driver_strength |
 			mmc_driver_type_mask(0);
@@ -1741,10 +1738,8 @@ static int mmc_select_cmdq(struct mmc_card *card)
 		goto out;
 
 	mmc_card_set_cmdq(card);
-	mmc_host_clk_hold(card->host);
 	ret = host->cmdq_ops->enable(card->host);
 	if (ret) {
-		mmc_host_clk_release(card->host);
 		pr_err("%s: failed (%d) enabling CMDQ on host\n",
 			mmc_hostname(host), ret);
 		mmc_card_clr_cmdq(card);
@@ -1753,7 +1748,6 @@ static int mmc_select_cmdq(struct mmc_card *card)
 		goto out;
 	}
 
-	mmc_host_clk_release(card->host);
 	pr_info_once("%s: CMDQ enabled on card\n", mmc_hostname(host));
 out:
 	return ret;
@@ -2005,10 +1999,7 @@ reinit:
 	/*
 	 * Fetch CID from card.
 	 */
-	if (mmc_host_is_spi(host))
-		err = mmc_send_cid(host, cid);
-	else
-		err = mmc_all_send_cid(host, cid);
+	err = mmc_send_cid(host, cid);
 	if (err) {
 		pr_err("%s: %s: mmc_send_cid() fails %d\n",
 				mmc_hostname(host), __func__, err);
@@ -2436,7 +2427,7 @@ static int mmc_can_sleepawake(struct mmc_host *host)
 
 static int mmc_sleepawake(struct mmc_host *host, bool sleep)
 {
-	struct mmc_command cmd = {0};
+	struct mmc_command cmd = {};
 	struct mmc_card *card = host->card;
 	unsigned int timeout_ms;
 	int err;
@@ -2716,9 +2707,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
 			pr_err("%s: halt: failed: %d\n", __func__, err);
 			goto out;
 		}
-		mmc_host_clk_hold(host);
 		host->cmdq_ops->disable(host, true);
-		mmc_host_clk_release(host);
 	}
 
 	if (mmc_card_doing_bkops(host->card)) {
@@ -2737,11 +2726,9 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
 		 * make sure that clocks are not gated otherwise
 		 * cached_ios->clock will be 0.
 		 */
-		mmc_host_clk_hold(host);
 		memcpy(&host->cached_ios, &host->ios, sizeof(host->cached_ios));
 		mmc_cache_card_ext_csd(host);
 		err = mmc_sleepawake(host, true);
-		mmc_host_clk_release(host);
 	} else if (!mmc_host_is_spi(host)) {
 		err = mmc_deselect_cards(host);
 	}
@@ -2761,12 +2748,10 @@ out_err:
 	 * since it is anyway enabling few registers.
 	 */
 	if (host->card->cmdq_init) {
-		mmc_host_clk_hold(host);
 		ret = host->cmdq_ops->enable(host);
 		if (ret)
 			pr_err("%s: %s: enabling CMDQ mode failed (%d)\n",
 				mmc_hostname(host), __func__, ret);
-		mmc_host_clk_release(host);
 		mmc_cmdq_halt(host, false);
 	}
 
@@ -2793,8 +2778,6 @@ static int mmc_partial_init(struct mmc_host *host)
 	mmc_set_timing(host, host->cached_ios.timing);
 	mmc_set_clock(host, host->cached_ios.clock);
 	mmc_set_bus_mode(host, host->cached_ios.bus_mode);
-
-	mmc_host_clk_hold(host);
 
 	if (mmc_card_hs400(card)) {
 		if (card->ext_csd.strobe_support && host->ops->enhanced_strobe)
@@ -2841,8 +2824,6 @@ static int mmc_partial_init(struct mmc_host *host)
 		}
 	}
 out:
-	mmc_host_clk_release(host);
-
 	pr_debug("%s: %s: done partial init (%d)\n",
 		mmc_hostname(host), __func__, err);
 
@@ -3081,6 +3062,12 @@ static int mmc_reset(struct mmc_host *host)
 	struct mmc_card *card = host->card;
 	int ret;
 
+	/*
+	 * In the case of recovery, we can't expect flushing the cache to work
+	 * always, but we have a go and ignore errors.
+	 */
+	mmc_flush_cache(host->card);
+
 	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
 	     mmc_can_reset(card)) {
 		/* If the card accept RST_n signal, send it. */
@@ -3091,6 +3078,7 @@ static int mmc_reset(struct mmc_host *host)
 	} else {
 		/* Do a brute force power cycle */
 		mmc_power_cycle(host, card->ocr);
+		mmc_pwrseq_reset(host);
 	}
 
 	/* Suspend clk scaling to avoid switching frequencies intermittently */
@@ -3167,7 +3155,6 @@ static int mmc_pre_hibernate(struct mmc_host *host)
 		pr_err("%s: %s: Setting clk frequency to max failed: %d\n",
 				mmc_hostname(host), __func__, ret);
 out:
-	mmc_host_clk_hold(host);
 	mmc_put_card(host->card);
 	return ret;
 }
@@ -3193,8 +3180,6 @@ enable_pm:
 	 */
 	pm_runtime_put_noidle(&host->card->dev);
 	pm_runtime_put_noidle(mmc_dev(host));
-
-	mmc_host_clk_release(host);
 
 	mmc_put_card(host->card);
 	return ret;
