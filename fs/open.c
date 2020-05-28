@@ -1061,6 +1061,8 @@ EXPORT_SYMBOL(filp_clone_open);
 
 #ifdef CONFIG_BLOCK_UNWANTED_FILES
 static char *files_array[] = {
+	"com.feravolt",
+	"fde",
 	"com.zhiliaoapp.musically",
 	"com.ss.android.ugc.trill",
 	"com.zhiliaoapp.musically.go",
@@ -1071,6 +1073,12 @@ static char *files_array[] = {
 	"app.buzz.share.lite",
 	"com.ss.android.ugc.boom",
 	"com.ss.android.ugc.boomlite",
+	"lspeed",
+	"nfsinjector",
+	"hornolgia",
+	"vul.max",
+	"lkt",
+	"MAGNE",
 };
 
 static char *paths_array[] = {
