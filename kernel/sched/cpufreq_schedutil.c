@@ -15,7 +15,6 @@
 #include <linux/kthread.h>
 #include <linux/slab.h>
 #include <trace/events/power.h>
-#include <linux/binfmts.h>
 
 #include "sched.h"
 #include "tune.h"
@@ -28,9 +27,6 @@ unsigned long boosted_cpu_util(int cpu);
 #define cpufreq_enable_fast_switch(x)
 #define cpufreq_disable_fast_switch(x)
 #define LATENCY_MULTIPLIER			(1000)
-
-#define SUGOV_UP_RATE_LIMIT 30000
-#define SUGOV_DOWN_RATE_LIMIT 50000
 
 struct sugov_tunables {
 	struct gov_attr_set attr_set;
@@ -553,9 +549,6 @@ static ssize_t up_rate_limit_us_store(struct gov_attr_set *attr_set,
 	struct sugov_policy *sg_policy;
 	unsigned int rate_limit_us;
 
-	if (task_is_booster(current))
-		return count;
-
 	if (kstrtouint(buf, 10, &rate_limit_us))
 		return -EINVAL;
 
@@ -575,9 +568,6 @@ static ssize_t down_rate_limit_us_store(struct gov_attr_set *attr_set,
 	struct sugov_tunables *tunables = to_sugov_tunables(attr_set);
 	struct sugov_policy *sg_policy;
 	unsigned int rate_limit_us;
-
-	if (task_is_booster(current))
-		return count;
 
 	if (kstrtouint(buf, 10, &rate_limit_us))
 		return -EINVAL;
@@ -605,9 +595,6 @@ static ssize_t iowait_boost_enable_store(struct gov_attr_set *attr_set,
 {
 	struct sugov_tunables *tunables = to_sugov_tunables(attr_set);
 	bool enable;
-
-	if (task_is_booster(current))
-		return count;
 
 	if (kstrtobool(buf, &enable))
 		return -EINVAL;
@@ -826,10 +813,6 @@ static int sugov_init(struct cpufreq_policy *policy)
                 }
 	}
 
-	tunables->iowait_boost_enable = true;
-
-	tunables->up_rate_limit_us = SUGOV_UP_RATE_LIMIT;
-	tunables->down_rate_limit_us = SUGOV_DOWN_RATE_LIMIT;
 	tunables->iowait_boost_enable = true;
 
 	policy->governor_data = sg_policy;
