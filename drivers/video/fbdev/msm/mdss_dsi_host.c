@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2018, 2020, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -20,6 +20,7 @@
 #include <linux/slab.h>
 #include <linux/iopoll.h>
 #include <linux/kthread.h>
+#include <linux/errno.h>
 
 #include <linux/msm-bus.h>
 
@@ -1136,7 +1137,10 @@ static int mdss_dsi_read_status(struct mdss_dsi_ctrl_pdata *ctrl)
 	int i, rc, *lenp;
 	int start = 0;
 	struct dcs_cmd_req cmdreq;
-
+/* Huaqin modify for ZQL1650 by xieguoqiang at 2018/02/09 start */
+	int times = 0;
+	*ctrl->status_buf.data = 0;
+/* Huaqin modify for ZQL1650 by xieguoqiang at 2018/02/09 end */
 	rc = 1;
 	lenp = ctrl->status_valid_params ?: ctrl->status_cmds_rlen;
 
@@ -1146,6 +1150,9 @@ static int mdss_dsi_read_status(struct mdss_dsi_ctrl_pdata *ctrl)
 	}
 
 	for (i = 0; i < ctrl->status_cmds.cmd_cnt; ++i) {
+/* Huaqin modify for ZQL1650 by xieguoqiang at 2018/02/09 start */
+		while(times < 2 && ((*ctrl->status_buf.data) != 0x0c)&& ((*ctrl->status_buf.data) != 0x9c)&& ((*ctrl->status_buf.data) != 0x98)){
+/* Huaqin modify for ZQL1650 by xieguoqiang at 2018/02/09 end */
 		memset(&cmdreq, 0, sizeof(cmdreq));
 		cmdreq.cmds = ctrl->status_cmds.cmds + i;
 		cmdreq.cmds_cnt = 1;
@@ -1160,6 +1167,10 @@ static int mdss_dsi_read_status(struct mdss_dsi_ctrl_pdata *ctrl)
 			cmdreq.flags |= CMD_REQ_HS_MODE;
 
 		rc = mdss_dsi_cmdlist_put(ctrl, &cmdreq);
+/* Huaqin modify for ZQL1650 by xieguoqiang at 2018/02/09 start */
+		times++;
+		}
+/* Huaqin modify for ZQL1650 by xieguoqiang at 2018/02/09 end */
 		if (rc <= 0) {
 			if (!mdss_dsi_sync_wait_enable(ctrl) ||
 				mdss_dsi_sync_wait_trigger(ctrl))
@@ -1236,6 +1247,9 @@ int mdss_dsi_reg_status_check(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 		else if (sctrl_pdata)
 			ret = ctrl_pdata->check_read_status(sctrl_pdata);
 	} else {
+/* Huaqin duchangguo modify for disabling esd check when panel is not connect before boot start*/
+		ret = -ENOTSUPP;
+/* Huaqin duchangguo modify for disabling esd check when panel is not connect before boot end*/
 		pr_err("%s: Read status register returned error\n", __func__);
 	}
 
@@ -2668,7 +2682,7 @@ int mdss_dsi_cmdlist_rx(struct mdss_dsi_ctrl_pdata *ctrl,
 }
 
 static inline bool mdss_dsi_delay_cmd(struct mdss_dsi_ctrl_pdata *ctrl,
-	bool from_mdp, struct dcs_cmd_req *req)
+	bool from_mdp)
 {
 	unsigned long flags;
 	bool mdp_busy = false;
@@ -2678,9 +2692,9 @@ static inline bool mdss_dsi_delay_cmd(struct mdss_dsi_ctrl_pdata *ctrl,
 		goto exit;
 
 	/* delay only for split dsi, cmd mode and burst mode enabled cases */
-	if ((!mdss_dsi_is_hw_config_split(ctrl->shared_data) ||
+	if (!mdss_dsi_is_hw_config_split(ctrl->shared_data) ||
 	    !(ctrl->panel_mode == DSI_CMD_MODE) ||
-	    !ctrl->burst_mode_enabled) && !(req->flags & CMD_REQ_DCS))
+	    !ctrl->burst_mode_enabled)
 		goto exit;
 
 	/* delay only if cmd is not from mdp and panel has been initialized */
@@ -2689,10 +2703,8 @@ static inline bool mdss_dsi_delay_cmd(struct mdss_dsi_ctrl_pdata *ctrl,
 
 	/* if broadcast enabled, apply delay only if this is the ctrl trigger */
 	if (mdss_dsi_sync_wait_enable(ctrl) &&
-	   (!mdss_dsi_sync_wait_trigger(ctrl) && !(req->flags & CMD_REQ_DCS)))
+	   !mdss_dsi_sync_wait_trigger(ctrl))
 		goto exit;
-	else
-		need_wait = true;
 
 	spin_lock_irqsave(&ctrl->mdp_lock, flags);
 	if (ctrl->mdp_busy == true)
@@ -2832,7 +2844,7 @@ int mdss_dsi_cmdlist_commit(struct mdss_dsi_ctrl_pdata *ctrl, int from_mdp)
 	 * mdp path
 	 */
 	mutex_lock(&ctrl->mutex);
-	if (mdss_dsi_delay_cmd(ctrl, from_mdp, req))
+	if (mdss_dsi_delay_cmd(ctrl, from_mdp))
 		ctrl->mdp_callback->fxn(ctrl->mdp_callback->data,
 			MDP_INTF_CALLBACK_DSI_WAIT);
 	mutex_unlock(&ctrl->mutex);

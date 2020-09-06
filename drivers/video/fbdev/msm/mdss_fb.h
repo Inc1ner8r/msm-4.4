@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2020, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -286,13 +286,14 @@ struct msm_fb_data_type {
 	u32 idle_state;
 	struct msm_fb_fps_info fps_info;
 	struct delayed_work idle_notify_work;
+	struct delayed_work early_unblank_work;
+	bool early_unblank_work_queued;
 
 	bool atomic_commit_pending;
 
 	int op_enable;
 	u32 fb_imgType;
 	int panel_reconfig;
-	int force_null_commit;
 	u32 panel_orientation;
 
 	u32 dst_format;
