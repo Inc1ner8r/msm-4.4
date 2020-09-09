@@ -2586,13 +2586,6 @@ static int smb2_probe(struct platform_device *pdev)
 		pr_err("parent regmap is missing\n");
 		return -EINVAL;
 	}
-<<<<<<< HEAD
-/* Huaqin modify for ZQL1650-74 Countrycode Adapter by diganyun at 2018/03/26 start */
-	INIT_DELAYED_WORK(&chg->read_countrycode_work, read_BR_countrycode_work);
-	schedule_delayed_work(&chg->read_countrycode_work, msecs_to_jiffies(30000));
-/* Huaqin modify for ZQL1650-74 Countrycode Adapter by diganyun at 2018/03/26 end */
-=======
->>>>>>> a1ca157e85a4... power: Remove Adapter Country detection
 
 	rc = smb2_chg_config_init(chip);
 	if (rc < 0) {
