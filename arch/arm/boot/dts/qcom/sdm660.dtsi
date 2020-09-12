@@ -427,13 +427,11 @@
 		};
 
 		/* Huaqin add for ZQL1650-358 by liunianliang at 2018/02/08 start */
-		pstore_reserve_mem: pstore_reserve_mem_region@0 {
-			linux,reserve-contiguous-region;
-			linux,reserve-region;
-			linux,remove-completely;
-			reg = <0x0 0x9ff00000 0x0 0x00100000>;
-			label = "pstore_reserve_mem";	
-			};	
+		ramoops_mem: ramoops_region@0x9ff00000 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x9ff00000 0x0 0x400000>;
+		};	
 
 
 		dfps_data_mem: dfps_data_mem@0x9f7ff000 {
@@ -2727,6 +2725,15 @@
 
 &blsp2_uart1_hs {
 	status = "ok";
+};
+
+&soc {
+	ramoops {
+		compatible = "ramoops";
+		memory-region = <&ramoops_mem>;
+		console-size = <0x0 0x200000>;
+		pmsg-size = <0x0 0x200000>;
+	};
 };
 
 #include "sdm660-mdss.dtsi"
