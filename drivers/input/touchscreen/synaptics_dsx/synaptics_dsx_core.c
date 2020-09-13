@@ -3875,7 +3875,6 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 	INIT_WORK(&rmi4_data->reset_work, synaptics_rmi4_reset_work);
 	queue_work(rmi4_data->reset_workqueue, &rmi4_data->reset_work);
 #endif
->>>>>>> 018676053b4dc... treewide: queue delayed works on system_power_efficient_wq
 
 	return retval;
 
