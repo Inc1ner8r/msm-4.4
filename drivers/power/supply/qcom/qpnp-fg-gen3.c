@@ -5794,7 +5794,7 @@ static int fg_gen3_probe(struct platform_device *pdev)
 	INIT_DELAYED_WORK(&battery_health_work, battery_health_worker); //battery_health_work
 	battery_health_data_reset();
 
-	schedule_delayed_work(&battery_health_work, 30 * HZ); //battery_health_work
+	schedule_delayed_work(&battery_health_work, 90 * HZ); // increase delay for backup operation after sdcard mount successfully
 //Huaqin add by jianghao at 2019/05/13 end
 	INIT_WORK(&chip->esr_filter_work, esr_filter_work);
 	alarm_init(&chip->esr_filter_alarm, ALARM_BOOTTIME,
