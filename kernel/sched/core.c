@@ -76,7 +76,6 @@
 #include <linux/context_tracking.h>
 #include <linux/compiler.h>
 #include <linux/cpufreq.h>
-#include <linux/cpufreq_times.h>
 #include <linux/prefetch.h>
 
 #include <linux/kcov.h>
