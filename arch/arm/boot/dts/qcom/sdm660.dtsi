@@ -427,10 +427,10 @@
 		};
 
 		/* Huaqin add for ZQL1650-358 by liunianliang at 2018/02/08 start */
-		ramoops_mem: ramoops_region@0x9ff00000 {
+		ramoops_mem: ramoops_region@b0000000 {
 			compatible = "removed-dma-pool";
 			no-map;
-			reg = <0x0 0x9ff00000 0x0 0x400000>;
+			reg = <0x0 0xb0000000 0x0 0x00400000>;
 		};	
 
 
@@ -2742,9 +2742,11 @@
 &soc {
 	ramoops {
 		compatible = "ramoops";
+		status = "ok";
 		memory-region = <&ramoops_mem>;
-		console-size = <0x0 0x200000>;
-		pmsg-size = <0x0 0x200000>;
+
+		console-size = <0x0 0x200000>; /* 2 MB */
+		pmsg-size    = <0x0 0x200000>; /* 2 MB */
 	};
 };
 
