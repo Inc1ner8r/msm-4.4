@@ -375,7 +375,7 @@ asmlinkage void secondary_start_kernel(void)
 
 	notify_cpu_starting(cpu);
 
-	pr_info("CPU%u (thread %u): Booted secondary processor\n",
+	pr_debug("CPU%u (thread %u): Booted secondary processor\n",
 		cpu, cpu_2_hwthread_id[cpu]);
 
 	calibrate_delay();

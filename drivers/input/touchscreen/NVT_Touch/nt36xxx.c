@@ -470,8 +470,6 @@ void nvt_bootloader_reset(void)
 {
 	uint8_t buf[8] = {0};
 
-	NVT_LOG("start\n");
-
 	//---write i2c cmds to reset---
 	buf[0] = 0x00;
 	buf[1] = 0x69;
@@ -479,8 +477,6 @@ void nvt_bootloader_reset(void)
 
 	// need 35ms delay after bootloader reset
 	msleep(35);
-
-	NVT_LOG("end\n");
 }
 
 /*******************************************************
@@ -1807,8 +1803,6 @@ static int32_t nvt_ts_resume(struct device *dev)
 
 	mutex_lock(&ts->lock);
 
-	NVT_LOG("start\n");
-
 	// please make sure display reset(RESX) sequence and mipi dsi cmds sent before this
 #if NVT_TOUCH_SUPPORT_HW_RST
 	gpio_set_value(ts->reset_gpio, 1);
@@ -1824,8 +1818,6 @@ if (!allow_gesture && !screen_gesture) {
 	bTouchIsAwake = 1;
 
 	mutex_unlock(&ts->lock);
-
-	NVT_LOG("end\n");
 
 	return 0;
 }

@@ -4123,7 +4123,7 @@ static int stk3x1x_suspend(struct device *dev)
 	struct i2c_client *client = to_i2c_client(dev);
 #endif
 
-	printk(KERN_INFO "%s\n", __func__);
+	pr_debug(KERN_INFO "%s\n", __func__);
 #ifndef SPREADTRUM_PLATFORM
 	mutex_lock(&ps_data->io_lock);
 #endif
@@ -4192,7 +4192,7 @@ static int stk3x1x_resume(struct device *dev)
 	struct i2c_client *client = to_i2c_client(dev);
 #endif
 
-	printk(KERN_INFO "%s\n", __func__);
+	pr_debug(KERN_INFO "%s\n", __func__);
 #ifndef SPREADTRUM_PLATFORM
 	mutex_lock(&ps_data->io_lock);
 #endif
