@@ -748,7 +748,7 @@
 				qcom,cpr-voltage-floor =
 					<508000  508000  516000  572000  632000
 					 664000  704000  764000>;
-					 
+
 				qcom,corner-frequencies =
 					/* Speed bin 0 */
 					<300000000  633600000  902400000
@@ -896,9 +896,10 @@
 					<644000  644000  708000  788000
 					 908000  908000 988000>;
 
-				qcom,cpr-voltage-floor =
+				qcom,cpr-voltage-floor =	 
 					<508000  516000  572000  632000
 					 664000  704000  762000>;
+
 
 				qcom,corner-frequencies =
 					/* Speed bin 0 */
