@@ -3618,7 +3618,7 @@ static void usbpd_connect_callback(struct usbpd_svid_handler *hdlr)
 
 	dp_drv = container_of(hdlr, struct mdss_dp_drv_pdata, svid_handler);
 	if (!dp_drv->pd) {
-		pr_debug("get_usbpd phandle failed\n");
+		pr_err("get_usbpd phandle failed\n");
 		return;
 	}
 
@@ -3636,7 +3636,7 @@ static void usbpd_disconnect_callback(struct usbpd_svid_handler *hdlr)
 
 	dp_drv = container_of(hdlr, struct mdss_dp_drv_pdata, svid_handler);
 	if (!dp_drv->pd) {
-		pr_debug("get_usbpd phandle failed\n");
+		pr_err("get_usbpd phandle failed\n");
 		return;
 	}
 
@@ -4134,7 +4134,7 @@ static void usbpd_response_callback(struct usbpd_svid_handler *hdlr, u8 cmd,
 
 	dp_drv = container_of(hdlr, struct mdss_dp_drv_pdata, svid_handler);
 	if (!dp_drv->pd) {
-		pr_debug("get_usbpd phandle failed\n");
+		pr_err("get_usbpd phandle failed\n");
 		return;
 	}
 
@@ -4333,7 +4333,7 @@ exit:
 	pr_debug("exit\n");
 }
 
-static int __maybe_unused mdss_dp_usbpd_setup(struct mdss_dp_drv_pdata *dp_drv)
+static int mdss_dp_usbpd_setup(struct mdss_dp_drv_pdata *dp_drv)
 {
 	int ret = 0;
 	const char *pd_phandle = "qcom,dp-usbpd-detection";
@@ -4342,7 +4342,7 @@ static int __maybe_unused mdss_dp_usbpd_setup(struct mdss_dp_drv_pdata *dp_drv)
 						    pd_phandle);
 
 	if (IS_ERR(dp_drv->pd)) {
-		pr_debug("get_usbpd phandle failed (%ld)\n",
+		pr_err("get_usbpd phandle failed (%ld)\n",
 				PTR_ERR(dp_drv->pd));
 		return PTR_ERR(dp_drv->pd);
 	}
@@ -4415,7 +4415,7 @@ static int mdss_dp_probe(struct platform_device *pdev)
 	init_completion(&dp_drv->video_comp);
 
 	if (mdss_dp_usbpd_setup(dp_drv)) {
-		pr_debug("Error usbpd setup!\n");
+		pr_err("Error usbpd setup!\n");
 		devm_kfree(&pdev->dev, dp_drv);
 		dp_drv = NULL;
 		return -EPROBE_DEFER;
